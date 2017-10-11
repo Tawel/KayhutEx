@@ -1,3 +1,20 @@
+Graph Scheme:
+Node: user, movie, genre
+Relations: Rated, ofGenre
+example
+
+
+                                       (:Genre{genre:"Thriller"})
+                                                ^
+                                                |
+                                             [:ofGenre]
+                                                |
+(u:User{userId:1})-[:Rated{rating:3.5}]->(m:Movie{title:"titanic"})-[:ofGenre]->(:Genre{genre:"Drama"})
+                                                
+
+
+
+
 Question number 1:
 parameters - movieId, rating
 
@@ -22,3 +39,4 @@ parameter - userId
     WITH nm,u,ra
     ORDER BY ra.timestamp desc LIMIT 10
     RETURN nm,avg(ra.rating)
+
