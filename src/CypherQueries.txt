@@ -1,0 +1,24 @@
+Question number 1:
+parameters - movieId, rating
+
+    MATCH (u:User)-[r:Rated]-(x:Movie{movieId:{movieId}})
+    WHERE r.rating>={rating}
+    WITH x, u LIMIT 10
+    MATCH (u)--(m:Movie)--(g:Genre)--(x)
+    WHERE x<>m
+    RETURN m LIMIT 3
+
+
+Question Number 2:
+parameter - userId
+
+    MATCH (u:User{userId:{userId}})-[r:Rated]-(m:Movie)--(g:Genre)
+    WITH sum(r.rating) as totalGrade, g
+    ORDER BY totalGrade desc LIMIT 1
+    WITH g
+    MATCH (nm:Movie)--(g)
+    WITH nm LIMIT 5
+    MATCH (u:User)-[ra:Rated]-(nm)
+    WITH nm,u,ra
+    ORDER BY ra.timestamp desc LIMIT 10
+    RETURN nm,avg(ra.rating)
