@@ -10,7 +10,7 @@ example
                                              [:ofGenre]
                                                 |
 (u:User{userId:1})-[:Rated{rating:3.5}]->(m:Movie{title:"titanic"})-[:ofGenre]->(:Genre{genre:"Drama"})
-                                                
+
 
 
 

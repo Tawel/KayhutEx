@@ -19,7 +19,7 @@ object MoviesToNeo {
     val session = driver.session
 
     // Assumptions:
-    // 1. I dont need all the data that is given, hence not saving all of it.
+    // 1. I dont need all the data that is given(all the csvs), hence not saving all of it.
     saveMovieToNeo(sparkSession, session)
     saveRatingsToNeo(sparkSession, session)
 
@@ -32,10 +32,13 @@ object MoviesToNeo {
     val ratingsPath = "Resources/ratings.csv"
     val data = sparkSession.read.option("header","true").csv(ratingsPath)
 
+    // Creating index on UserId property of User label for future use
+    session.run("CREATE INDEX ON :User(userId)")
+
     data
       .collect()
       .foreach(x => {
-        session.run("CREATE INDEX ON :USER(userId)")
+
         session.run("MATCH (m:Movie) WHERE m.movieId={movieToFind}" +
           "MERGE (u:User {userId: {userId}})" +
           "CREATE (u)-[:Rated {rating: {rating}, timestamp: {timestamp}}]->(m)",
@@ -51,14 +54,16 @@ object MoviesToNeo {
     val linksDF = sparkSession.read.option("header","true").csv(linksPath)
     val data = moviesDF.join(linksDF, "movieId")
 
+
+    // Creating Index on movieId property of Movie label for future use
+    session.run("CREATE INDEX ON :Movie(movieId)")
+
     data
       .collect()
       .foreach(x => {
 
-        // Creating Index on id
-        session.run("CREATE INDEX ON :Movie(movieId)")
-
         // Saving Genres as different nodes, connected to movies.
+        // Creating separate merge and create statements for the genres.
         val genres= x(2).toString.split('|')
         val merges = genres.map(g => "MERGE (b"+genres.indexOf(g)+":Genre{genreName:\""+g+"\"})").mkString(" ")
         val creates = genres.map(g=> s"(a)-[:OfGenre]->(b${genres.indexOf(g)})").mkString(", ")
